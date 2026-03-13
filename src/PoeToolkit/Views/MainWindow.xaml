@@ -1,0 +1,297 @@
+<Window x:Class="PoeCurrencySpammer.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:views="clr-namespace:PoeCurrencySpammer.Views"
+        Title="POE Toolkit"
+        Width="780" Height="750"
+        MinWidth="660" MinHeight="520"
+        Background="{StaticResource BgBrush}"
+        Icon="/Resources/icon.ico">
+
+    <Window.Resources>
+        <views:CountToVisibilityConverter x:Key="CountToVisibility" />
+    </Window.Resources>
+
+    <TabControl Margin="12,8,12,12">
+
+        <!-- Main Tab -->
+        <TabItem Header="  Main  ">
+            <Grid Margin="16,14,16,12" Background="{StaticResource BgBrush}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <!-- Header -->
+                <TextBlock Grid.Row="0"
+                           Text="PoE Currency Spammer"
+                           Foreground="{StaticResource TextBrush}"
+                           FontFamily="Segoe UI Semibold"
+                           FontSize="20"
+                           Margin="0,0,0,12" />
+
+                <!-- Mod Selector -->
+                <StackPanel Grid.Row="1" Margin="0,0,0,8">
+                    <TextBlock Text="MOD SELECTOR" Style="{StaticResource SectionLabel}" />
+
+                    <!-- Search box + dropdown -->
+                    <Grid Margin="0,0,0,4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox Grid.Column="0"
+                                 Style="{StaticResource DarkTextBox}"
+                                 Text="{Binding Main.ModSearchText, UpdateSourceTrigger=PropertyChanged}"
+                                 FontFamily="Segoe UI" FontSize="12" />
+                        <Button Grid.Column="1" Content="Clear All" Style="{StaticResource SubtleButton}"
+                                Command="{Binding Main.ClearModsCommand}"
+                                Margin="6,0,0,0" VerticalAlignment="Stretch" />
+                    </Grid>
+
+                    <!-- Search results dropdown -->
+                    <ListBox MaxHeight="140"
+                             ItemsSource="{Binding Main.ModSearchResults}"
+                             SelectedItem="{Binding Main.SelectedSearchResult, Mode=TwoWay}"
+                             Background="{StaticResource EntryBgBrush}"
+                             Foreground="{StaticResource TextBrush}"
+                             BorderBrush="{StaticResource EntryBorderBrush}"
+                             BorderThickness="1"
+                             FontFamily="Segoe UI" FontSize="11"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             Visibility="{Binding Main.ModSearchResults.Count, Converter={StaticResource CountToVisibility}}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Margin="4,2">
+                                    <TextBlock Text="{Binding Category}" Foreground="{StaticResource TextDimBrush}"
+                                               FontSize="10" Width="60" VerticalAlignment="Center" />
+                                    <TextBlock Text="{Binding Text}" Foreground="{StaticResource TextBrush}"
+                                               TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="Background" Value="Transparent" />
+                                <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+                                <Setter Property="Padding" Value="2" />
+                                <Setter Property="Cursor" Value="Hand" />
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="{StaticResource Surface2Brush}" />
+                                    </Trigger>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter Property="Background" Value="{StaticResource BlueBrush}" />
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                    </ListBox>
+
+                    <!-- Selected mods (chips) -->
+                    <ItemsControl ItemsSource="{Binding Main.SelectedMods}" Margin="0,4,0,0">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="{StaticResource Surface2Brush}"
+                                        CornerRadius="4" Padding="8,4" Margin="0,0,4,4">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding Text}" Foreground="{StaticResource TextBrush}"
+                                                   FontSize="11" VerticalAlignment="Center" />
+                                        <Button Content="  x" FontSize="10" Foreground="{StaticResource AccentBrush}"
+                                                Background="Transparent" BorderThickness="0" Cursor="Hand"
+                                                Padding="4,0,0,0" VerticalAlignment="Center"
+                                                Command="{Binding DataContext.Main.RemoveModCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                CommandParameter="{Binding}" />
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <!-- Raw regex (advanced) -->
+                    <TextBlock Text="GENERATED REGEX (editable)" Style="{StaticResource SectionLabel}" Margin="0,6,0,4" />
+                    <TextBox Style="{StaticResource DarkTextBox}" FontSize="11"
+                             Text="{Binding Main.SearchRegex, UpdateSourceTrigger=PropertyChanged}" />
+                </StackPanel>
+
+                <!-- Currency Modes Row 1 -->
+                <StackPanel Grid.Row="2" Margin="0,0,0,8">
+                    <TextBlock Text="CURRENCY MODES" Style="{StaticResource SectionLabel}" />
+                    <WrapPanel>
+                        <Button Content="Alteration (F5)" Style="{StaticResource BlueButton}"
+                                Command="{Binding Main.StartAlterationCommand}" Margin="0,0,4,6" />
+                        <TextBlock Text="aug:" Style="{StaticResource DimLabel}" Margin="4,0,4,6" />
+                        <ComboBox ItemsSource="{Binding Main.AltAugModeOptions}"
+                                  SelectedItem="{Binding Main.AltAugMode}"
+                                  Style="{StaticResource DarkComboBox}"
+                                  Width="85" VerticalAlignment="Center"
+                                  Margin="0,0,12,6" />
+                        <Button Content="Alch / Scour" Style="{StaticResource PurpleButton}"
+                                Command="{Binding Main.StartAlchScourCommand}" Margin="0,0,6,6" />
+                        <Button Content="Links" Style="{StaticResource OrangeButton}"
+                                Command="{Binding Main.StartLinksCommand}" Margin="0,0,4,6" />
+                        <TextBlock Text="min:" Style="{StaticResource DimLabel}" Margin="6,0,4,6" />
+                        <TextBox Style="{StaticResource SmallEntry}"
+                                 Text="{Binding Main.MinLinksText, UpdateSourceTrigger=PropertyChanged}"
+                                 Margin="0,0,12,6" />
+                    </WrapPanel>
+                </StackPanel>
+
+                <!-- Currency Modes Row 2 -->
+                <WrapPanel Grid.Row="3" Margin="0,0,0,12">
+                    <Button Content="Chromatic" Style="{StaticResource GreenButton}"
+                            Command="{Binding Main.StartChromaticCommand}" Margin="0,0,6,6" />
+                    <TextBlock Text="R:" Style="{StaticResource DimLabel}" Margin="8,0,4,6" />
+                    <TextBox Style="{StaticResource SmallEntry}"
+                             Text="{Binding Main.ChromaticR, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,6,6" />
+                    <TextBlock Text="G:" Style="{StaticResource DimLabel}" Margin="6,0,4,6" />
+                    <TextBox Style="{StaticResource SmallEntry}"
+                             Text="{Binding Main.ChromaticG, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,6,6" />
+                    <TextBlock Text="B:" Style="{StaticResource DimLabel}" Margin="6,0,4,6" />
+                    <TextBox Style="{StaticResource SmallEntry}"
+                             Text="{Binding Main.ChromaticB, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,16,6" />
+
+                    <Rectangle Width="1" Height="24" Fill="{StaticResource SeparatorBrush}" Margin="0,0,12,6" />
+
+                    <Button Content="Test Regex" Style="{StaticResource SubtleButton}"
+                            Command="{Binding Main.TestRegexCommand}" Margin="0,0,6,6" />
+                    <Button Content="Stop (ESC)" Style="{StaticResource AccentButton}"
+                            Command="{Binding Main.StopCommand}" Margin="0,0,0,6" />
+                </WrapPanel>
+
+                <!-- Autoclicker -->
+                <StackPanel Grid.Row="4" Margin="0,0,0,8">
+                    <TextBlock Text="AUTOCLICKER" Style="{StaticResource SectionLabel}" />
+                    <WrapPanel VerticalAlignment="Center">
+                        <Button Content="Autoclicker (F5)" Style="{StaticResource BlueButton}"
+                                Command="{Binding Main.StartAutoclickerCommand}" Margin="0,0,6,6" />
+                        <TextBlock Text="interval (ms):" Style="{StaticResource DimLabel}" Margin="6,0,4,6" />
+                        <TextBox Style="{StaticResource SmallEntry}" Width="50"
+                                 Text="{Binding Main.AutoclickerIntervalMs, UpdateSourceTrigger=PropertyChanged}"
+                                 Margin="0,0,12,6" />
+                        <CheckBox Content="Hold Ctrl" Foreground="{StaticResource TextBrush}"
+                                  IsChecked="{Binding Main.AutoclickerCtrl}" VerticalAlignment="Center"
+                                  Margin="0,0,12,6" />
+                        <CheckBox Content="Hold Shift" Foreground="{StaticResource TextBrush}"
+                                  IsChecked="{Binding Main.AutoclickerShift}" VerticalAlignment="Center"
+                                  Margin="0,0,6,6" />
+                    </WrapPanel>
+                </StackPanel>
+
+                <!-- Status -->
+                <TextBlock Grid.Row="5"
+                           Text="{Binding Main.StatusText}"
+                           Foreground="{Binding Main.StatusBrush}"
+                           FontFamily="Segoe UI Semibold"
+                           FontSize="14"
+                           Margin="0,0,0,10" />
+
+                <!-- Console Output -->
+                <DockPanel Grid.Row="6">
+                    <TextBlock DockPanel.Dock="Top"
+                               Text="CONSOLE OUTPUT"
+                               Style="{StaticResource SectionLabel}" />
+                    <Border CornerRadius="6"
+                            Background="{StaticResource ConsoleBgBrush}"
+                            BorderBrush="{StaticResource EntryBorderBrush}"
+                            BorderThickness="1"
+                            ClipToBounds="True">
+                        <TextBox x:Name="ConsoleBox"
+                                 Text="{Binding Main.ConsoleText, Mode=OneWay}"
+                                 IsReadOnly="True"
+                                 TextWrapping="Wrap"
+                                 VerticalScrollBarVisibility="Auto"
+                                 Background="Transparent"
+                                 Foreground="{StaticResource ConsoleFgBrush}"
+                                 CaretBrush="{StaticResource ConsoleFgBrush}"
+                                 BorderThickness="0"
+                                 FontFamily="Consolas"
+                                 FontSize="12"
+                                 Padding="10,8" />
+                    </Border>
+                </DockPanel>
+            </Grid>
+        </TabItem>
+
+        <!-- Settings Tab -->
+        <TabItem Header="  Settings  ">
+            <Grid Margin="16,14,16,12" Background="{StaticResource BgBrush}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Row="0" Grid.ColumnSpan="2"
+                           Text="Configuration"
+                           Foreground="{StaticResource TextBrush}"
+                           FontFamily="Segoe UI Semibold"
+                           FontSize="20"
+                           Margin="0,0,0,16" />
+
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="Delay after click (seconds)"
+                           Foreground="{StaticResource TextBrush}" FontSize="13" VerticalAlignment="Center"
+                           Margin="0,0,16,10" />
+                <TextBox Grid.Row="1" Grid.Column="1" Style="{StaticResource SettingsEntry}"
+                         Text="{Binding Settings.DelayAfterClick, UpdateSourceTrigger=PropertyChanged}"
+                         HorizontalAlignment="Left" Margin="0,0,0,10" />
+
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="Match sound frequency (Hz)"
+                           Foreground="{StaticResource TextBrush}" FontSize="13" VerticalAlignment="Center"
+                           Margin="0,0,16,10" />
+                <TextBox Grid.Row="2" Grid.Column="1" Style="{StaticResource SettingsEntry}"
+                         Text="{Binding Settings.MatchFrequency, UpdateSourceTrigger=PropertyChanged}"
+                         HorizontalAlignment="Left" Margin="0,0,0,10" />
+
+                <TextBlock Grid.Row="3" Grid.Column="0" Text="Match sound duration (ms)"
+                           Foreground="{StaticResource TextBrush}" FontSize="13" VerticalAlignment="Center"
+                           Margin="0,0,16,10" />
+                <TextBox Grid.Row="3" Grid.Column="1" Style="{StaticResource SettingsEntry}"
+                         Text="{Binding Settings.MatchDuration, UpdateSourceTrigger=PropertyChanged}"
+                         HorizontalAlignment="Left" Margin="0,0,0,10" />
+
+                <TextBlock Grid.Row="4" Grid.Column="0" Text="Stop key"
+                           Foreground="{StaticResource TextBrush}" FontSize="13" VerticalAlignment="Center"
+                           Margin="0,0,16,10" />
+                <TextBox Grid.Row="4" Grid.Column="1" Style="{StaticResource SettingsEntry}"
+                         Text="{Binding Settings.StopKey, UpdateSourceTrigger=PropertyChanged}"
+                         HorizontalAlignment="Left" Margin="0,0,0,10" />
+
+                <TextBlock Grid.Row="5" Grid.Column="0" Text="Start / Resume key"
+                           Foreground="{StaticResource TextBrush}" FontSize="13" VerticalAlignment="Center"
+                           Margin="0,0,16,10" />
+                <TextBox Grid.Row="5" Grid.Column="1" Style="{StaticResource SettingsEntry}"
+                         Text="{Binding Settings.StartKey, UpdateSourceTrigger=PropertyChanged}"
+                         HorizontalAlignment="Left" Margin="0,0,0,10" />
+
+                <StackPanel Grid.Row="6" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,12,0,0">
+                    <Button Content="Save Settings" Style="{StaticResource BlueButton}"
+                            Command="{Binding Settings.SaveCommand}" />
+                    <TextBlock Text="{Binding Settings.SaveMessage}"
+                               Foreground="{StaticResource GreenBrush}"
+                               FontSize="13" VerticalAlignment="Center"
+                               Margin="12,0,0,0" />
+                </StackPanel>
+            </Grid>
+        </TabItem>
+    </TabControl>
+</Window>
