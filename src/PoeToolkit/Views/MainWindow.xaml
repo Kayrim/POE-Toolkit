@@ -10,6 +10,7 @@
 
     <Window.Resources>
         <views:CountToVisibilityConverter x:Key="CountToVisibility" />
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
     </Window.Resources>
 
     <TabControl Margin="12,8,12,12">
@@ -290,6 +291,26 @@
                                Foreground="{StaticResource GreenBrush}"
                                FontSize="13" VerticalAlignment="Center"
                                Margin="12,0,0,0" />
+                </StackPanel>
+
+                <!-- Updates -->
+                <StackPanel Grid.Row="7" Grid.ColumnSpan="2" Margin="0,24,0,0">
+                    <TextBlock Text="UPDATES" Foreground="{StaticResource TextDimBrush}"
+                               FontFamily="Segoe UI Semibold" FontSize="11" Margin="0,0,0,8" />
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Current version:" Foreground="{StaticResource TextDimBrush}"
+                                   FontSize="13" VerticalAlignment="Center" Margin="0,0,6,0" />
+                        <TextBlock Text="{Binding Settings.CurrentVersion}" Foreground="{StaticResource TextBrush}"
+                                   FontSize="13" VerticalAlignment="Center" Margin="0,0,16,0" />
+                        <Button Content="Check for Updates" Style="{StaticResource SubtleButton}"
+                                Command="{Binding Settings.CheckForUpdatesCommand}" Margin="0,0,6,0" />
+                        <Button Content="Install Update" Style="{StaticResource GreenButton}"
+                                Command="{Binding Settings.InstallUpdateCommand}"
+                                Visibility="{Binding Settings.UpdateAvailable, Converter={StaticResource BoolToVisibility}}"
+                                Margin="0,0,6,0" />
+                    </StackPanel>
+                    <TextBlock Text="{Binding Settings.UpdateStatus}" Foreground="{StaticResource TextDimBrush}"
+                               FontSize="12" Margin="0,6,0,0" />
                 </StackPanel>
             </Grid>
         </TabItem>

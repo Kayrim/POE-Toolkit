@@ -25,9 +25,10 @@ public partial class App : Application
         services.AddSingleton<SoundService>();
         services.AddSingleton<ItemParserService>();
         services.AddSingleton<StatsLoaderService>();
+        services.AddSingleton<UpdateService>();
         services.AddSingleton<MainViewModel>();
         services.AddSingleton<SettingsViewModel>(sp =>
-            new SettingsViewModel(config, msg => { /* log callback wired later */ }));
+            new SettingsViewModel(config, msg => { }, sp.GetRequiredService<UpdateService>()));
         services.AddSingleton<MainWindow>();
 
         var provider = services.BuildServiceProvider();
