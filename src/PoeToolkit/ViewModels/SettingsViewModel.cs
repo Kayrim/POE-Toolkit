@@ -23,6 +23,8 @@ public partial class SettingsViewModel : ViewModelBase
     [ObservableProperty] private string _currentVersion = "";
     [ObservableProperty] private string _updateStatus = "";
     [ObservableProperty] private bool _updateAvailable;
+    [ObservableProperty] private double _downloadProgress;
+    [ObservableProperty] private bool _isDownloading;
     private string? _updateDownloadUrl;
 
     public SettingsViewModel(AppConfig config, Action<string> log, UpdateService update)
@@ -91,8 +93,11 @@ public partial class SettingsViewModel : ViewModelBase
 
         try
         {
+            IsDownloading = true;
+            DownloadProgress = 0;
             var progress = new Progress<string>(msg => UpdateStatus = msg);
-            await _update.DownloadAndApplyAsync(_updateDownloadUrl, progress);
+            var dlProgress = new Progress<double>(pct => DownloadProgress = pct);
+            await _update.DownloadAndApplyAsync(_updateDownloadUrl, progress, dlProgress);
 
             // Shut down the app — the updater script will replace the exe and relaunch
             Application.Current?.Dispatcher.Invoke(() =>
@@ -103,6 +108,7 @@ public partial class SettingsViewModel : ViewModelBase
         catch (Exception ex)
         {
             UpdateStatus = $"Update failed: {ex.Message}";
+            IsDownloading = false;
         }
     }
 }

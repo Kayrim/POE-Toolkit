@@ -57,7 +57,8 @@ public class UpdateService
     /// <summary>
     /// Download the update zip, extract, and launch a script to swap the exe and restart.
     /// </summary>
-    public async Task DownloadAndApplyAsync(string downloadUrl, IProgress<string>? progress = null)
+    public async Task DownloadAndApplyAsync(string downloadUrl, IProgress<string>? progress = null,
+        IProgress<double>? downloadProgress = null)
     {
         var currentExe = Environment.ProcessPath
             ?? Path.Combine(AppContext.BaseDirectory, "PoeToolkit.exe");
@@ -70,15 +71,33 @@ public class UpdateService
             Directory.Delete(tempDir, true);
         Directory.CreateDirectory(tempDir);
 
-        // Download
+        // Download with progress
         progress?.Report("Downloading update...");
         using (var response = await Http.GetAsync(downloadUrl, HttpCompletionOption.ResponseHeadersRead))
         {
             response.EnsureSuccessStatusCode();
+            var totalBytes = response.Content.Headers.ContentLength ?? -1;
             await using var stream = await response.Content.ReadAsStreamAsync();
             await using var file = File.Create(zipPath);
-            await stream.CopyToAsync(file);
+
+            var buffer = new byte[81920];
+            long downloaded = 0;
+            int bytesRead;
+            while ((bytesRead = await stream.ReadAsync(buffer)) > 0)
+            {
+                await file.WriteAsync(buffer.AsMemory(0, bytesRead));
+                downloaded += bytesRead;
+                if (totalBytes > 0)
+                {
+                    var pct = (double)downloaded / totalBytes;
+                    downloadProgress?.Report(pct);
+                    var mb = downloaded / 1048576.0;
+                    var totalMb = totalBytes / 1048576.0;
+                    progress?.Report($"Downloading... {mb:F1} / {totalMb:F1} MB ({pct:P0})");
+                }
+            }
         }
+        downloadProgress?.Report(1.0);
 
         // Extract
         progress?.Report("Extracting...");
@@ -88,7 +107,7 @@ public class UpdateService
             throw new FileNotFoundException("Update exe not found in zip");
 
         // Write updater script
-        progress?.Report("Applying update...");
+        progress?.Report("Restarting...");
         var scriptPath = Path.Combine(tempDir, "update.cmd");
         var script = $"""
             @echo off

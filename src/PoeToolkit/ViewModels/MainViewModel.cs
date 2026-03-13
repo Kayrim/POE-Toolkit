@@ -30,7 +30,7 @@ public partial class MainViewModel : ViewModelBase
     [ObservableProperty] private StatEntry? _selectedSearchResult;
 
     public ObservableCollection<StatEntry> ModSearchResults { get; } = [];
-    public ObservableCollection<StatEntry> SelectedMods { get; } = [];
+    public ObservableCollection<SelectedMod> SelectedMods { get; } = [];
     [ObservableProperty] private string _minLinksText = "0";
     [ObservableProperty] private string _chromaticR = "0";
     [ObservableProperty] private string _chromaticG = "0";
@@ -88,13 +88,15 @@ public partial class MainViewModel : ViewModelBase
     [RelayCommand]
     private void AddMod(StatEntry mod)
     {
-        if (SelectedMods.Any(m => m.Id == mod.Id)) return;
-        SelectedMods.Add(mod);
+        if (SelectedMods.Any(m => m.Entry.Id == mod.Id)) return;
+        var selected = new SelectedMod(mod);
+        selected.PropertyChanged += (_, _) => UpdateRegexFromMods();
+        SelectedMods.Add(selected);
         UpdateRegexFromMods();
     }
 
     [RelayCommand]
-    private void RemoveMod(StatEntry mod)
+    private void RemoveMod(SelectedMod mod)
     {
         SelectedMods.Remove(mod);
         UpdateRegexFromMods();
@@ -109,7 +111,7 @@ public partial class MainViewModel : ViewModelBase
 
     private void UpdateRegexFromMods()
     {
-        SearchRegex = StatsLoaderService.ModsToRegex(SelectedMods);
+        SearchRegex = StatsLoaderService.ModsToRegex(SelectedMods.Select(m => m.Entry));
     }
 
     public void SetScrollAction(Action scrollToEnd) => _scrollToEnd = scrollToEnd;
@@ -352,6 +354,7 @@ public partial class MainViewModel : ViewModelBase
     {
         _config.SearchRegex = SearchRegex;
         _config.AltAugMode = AltAugMode;
+        _config.SelectedMods = SelectedMods.ToList();
         _ = int.TryParse(MinLinksText, out int ml);
         _config.MinLinks = Math.Max(0, ml);
         _ = int.TryParse(ChromaticR, out int r);

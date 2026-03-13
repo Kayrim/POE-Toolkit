@@ -176,6 +176,55 @@ public class ItemParserService
         };
     }
 
+    /// <summary>
+    /// Check item mods against selected mods with optional min/max roll filtering.
+    /// Each mod is OR'd — any single match returns success.
+    /// </summary>
+    public MatchResult CheckModsWithRolls(string itemText, IEnumerable<Models.SelectedMod> mods)
+    {
+        if (string.IsNullOrWhiteSpace(itemText))
+            return new MatchResult(false, string.Empty);
+
+        var lines = itemText.Split('\n');
+
+        foreach (var mod in mods)
+        {
+            // Build a regex with a capture group for the number
+            string pattern = Regex.Escape(mod.Entry.Text)
+                .Replace(@"\#", @"(\d+)(?:\([\d.,-]+\))?");
+
+            foreach (var line in lines)
+            {
+                var match = Regex.Match(line, pattern, RegexOptions.IgnoreCase);
+                if (!match.Success) continue;
+
+                // If mod has rolls and user set min/max, validate the number
+                if (mod.HasRoll && match.Groups.Count > 1 && (mod.MinValue > 0 || mod.MaxValue > 0))
+                {
+                    if (int.TryParse(match.Groups[1].Value, out int roll))
+                    {
+                        if (mod.MinValue > 0 && roll < mod.MinValue) continue;
+                        if (mod.MaxValue > 0 && roll > mod.MaxValue) continue;
+                    }
+                }
+
+                return new MatchResult(true, line.Trim());
+            }
+        }
+
+        return new MatchResult(false, string.Empty);
+    }
+
+    /// <summary>
+    /// Smart check: uses roll-aware matching if selected mods exist, otherwise falls back to regex.
+    /// </summary>
+    public MatchResult CheckItem(string itemText, string regexPattern, IReadOnlyList<Models.SelectedMod> selectedMods)
+    {
+        if (selectedMods.Count > 0)
+            return CheckModsWithRolls(itemText, selectedMods);
+        return CheckModQuality(itemText, regexPattern);
+    }
+
     public string? GetItemRarity(string itemText)
     {
         var match = Regex.Match(itemText, @"Rarity: (\w+)");

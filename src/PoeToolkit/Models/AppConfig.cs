@@ -1,10 +1,17 @@
 using System.IO;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace PoeCurrencySpammer.Models;
 
 public class AppConfig
 {
+    /// <summary>
+    /// Transient: current selected mods with roll constraints. Not persisted.
+    /// </summary>
+    [JsonIgnore]
+    public IReadOnlyList<SelectedMod> SelectedMods { get; set; } = [];
+
     public string StopKey { get; set; } = "Escape";
     public string StartKey { get; set; } = "F5";
     public int MatchFoundFrequency { get; set; } = 1000;

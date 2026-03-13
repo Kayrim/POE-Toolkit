@@ -26,6 +26,10 @@ public class StatsLoaderService
 
         foreach (var stat in AllStats)
         {
+            // Only show explicit mods in search results
+            if (!string.Equals(stat.Type, "explicit", StringComparison.OrdinalIgnoreCase))
+                continue;
+
             var lower = stat.Text.ToLowerInvariant();
             if (terms.All(t => lower.Contains(t)))
             {

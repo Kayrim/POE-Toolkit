@@ -52,7 +52,7 @@ public class AlterationStrategy : ICurrencyStrategy
             return new MatchResult(false, string.Empty);
 
         // Step 3: Check match
-        var result = _parser.CheckModQuality(itemText, _config.SearchRegex);
+        var result = _parser.CheckItem(itemText, _config.SearchRegex, _config.SelectedMods);
         if (result.IsMatch)
             return result;
 
@@ -70,7 +70,7 @@ public class AlterationStrategy : ICurrencyStrategy
             // Read augmented item
             var augText = _clipboard.CopyItemTextReliable(ct);
             if (!string.IsNullOrEmpty(augText))
-                return _parser.CheckModQuality(augText, _config.SearchRegex);
+                return _parser.CheckItem(augText, _config.SearchRegex, _config.SelectedMods);
         }
 
         return new MatchResult(false, string.Empty);

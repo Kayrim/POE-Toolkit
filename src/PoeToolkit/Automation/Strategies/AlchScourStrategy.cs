@@ -48,7 +48,7 @@ public class AlchScourStrategy : ICurrencyStrategy
         // Step 3: Check — must reliably read before allowing next cycle
         var itemText = _clipboard.CopyItemTextReliable(ct);
         if (!string.IsNullOrEmpty(itemText))
-            return _parser.CheckModQuality(itemText, _config.SearchRegex);
+            return _parser.CheckItem(itemText, _config.SearchRegex, _config.SelectedMods);
 
         return new MatchResult(false, string.Empty);
     }
