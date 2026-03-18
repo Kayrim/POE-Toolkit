@@ -13,7 +13,7 @@ public class AlterationStrategy : ICurrencyStrategy
 
     public string ModeName => "Alteration";
 
-    public string[] CoordinateLabels => _config.AltAugMode is "Prefix" or "Suffix"
+    public string[] CoordinateLabels => _config.AltAugMode is "Prefix" or "Suffix" or "Any"
         ? ["ALTERATION ORB", "AUGMENTATION ORB", "ITEM"]
         : ["ALTERATION ORB", "ITEM"];
 
@@ -28,7 +28,7 @@ public class AlterationStrategy : ICurrencyStrategy
 
     public MatchResult ExecuteIteration(Point[] coords, CancellationToken ct)
     {
-        bool useAug = _config.AltAugMode is "Prefix" or "Suffix";
+        bool useAug = _config.AltAugMode is "Prefix" or "Suffix" or "Any";
         var alteration = coords[0];
         var augmentation = useAug ? coords[1] : default;
         var item = useAug ? coords[2] : coords[1];

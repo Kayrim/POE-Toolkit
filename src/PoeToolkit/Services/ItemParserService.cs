@@ -160,10 +160,11 @@ public class ItemParserService
     /// Determines if augmentation should be attempted based on the mod layout.
     /// When seeking a prefix: augment if item has only suffix(es) and no prefix.
     /// When seeking a suffix: augment if item has only prefix(es) and no suffix.
+    /// When "Any": augment if either affix slot is empty (has room for another mod).
     /// </summary>
     public bool ShouldAugment(string itemText, string altAugMode)
     {
-        if (altAugMode is not ("Prefix" or "Suffix"))
+        if (altAugMode is not ("Prefix" or "Suffix" or "Any"))
             return false;
 
         var (prefixes, suffixes) = CountPrefixSuffix(itemText);
@@ -172,6 +173,7 @@ public class ItemParserService
         {
             "Prefix" => prefixes == 0 && suffixes > 0,
             "Suffix" => suffixes == 0 && prefixes > 0,
+            "Any" => (prefixes == 0 && suffixes > 0) || (suffixes == 0 && prefixes > 0),
             _ => false
         };
     }

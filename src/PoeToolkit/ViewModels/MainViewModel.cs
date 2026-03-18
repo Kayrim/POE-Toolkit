@@ -37,7 +37,7 @@ public partial class MainViewModel : ViewModelBase
     [ObservableProperty] private string _chromaticB = "0";
     // Alteration + Augmentation mode
     [ObservableProperty] private string _altAugMode = "None";
-    public string[] AltAugModeOptions { get; } = ["None", "Prefix", "Suffix"];
+    public string[] AltAugModeOptions { get; } = ["None", "Prefix", "Suffix", "Any"];
 
     [ObservableProperty] private string _consoleText = "";
     [ObservableProperty] private string _statusText = "Ready";
